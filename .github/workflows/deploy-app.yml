@@ -1,0 +1,76 @@
+name: Build and Deploy app
+
+# This workflow is a simple example of a workflow that runs on GitHub Actions.
+# It has two jobs, one that runs on the Explore-GitHub-Actions and the other that runs on the deploy-app. The Explore-GitHub-Actions job is triggered by a push event. The deploy-app job is triggered by the completion of the Explore-GitHub-Actions job.
+
+run-name: ${{ github.actor }} is deploying the app 🚀
+
+on:
+  push:
+    branches:
+      - main # [$default-branch] can be used in Workflow templates, but not in Workflows.
+  workflow_dispatch:
+    inputs:
+      debug_mode:
+        description: 'True to enable debugging steps'
+        required: true
+        default: false # should be combined with secrets.ACTIONS_RUNNER_DEBUG (inputs is only controllable context available in "if")
+        type: boolean 
+        
+env:
+  NODE_VERSION: 14.x
+
+permissions:
+  contents: read
+  
+jobs:
+  add-debug-info:
+    name: Add debug info
+    runs-on: ubuntu-latest
+    if: inputs.debug_mode 
+    steps:
+      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
+      - run: echo "🍏 This job's status is ${{ job.status }}."
+    
+  build-app:
+    name: Build App
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      # - name: Install dependencies
+      #   run: npm install
+      # - name: Build app
+      #   run: npm run build
+      # - name: Archive production artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: production-artifacts
+      #     path: |
+      #       build
+      #       node_modules
+      - run: echo "🏁 The build job was a success!"
+
+  deploy-app:
+    runs-on: ubuntu-latest
+    needs: build-app
+    steps:
+      # - name: Download production artifacts
+      #   uses: actions/download-artifact@v2
+      #   with:
+      #     name: production-artifacts
+      # - name: Deploy to production
+      #   run: |
+      #     npm install --production
+      #     npm run deploy
+      - run: echo "🏁 The deployment job was a success!"
+
